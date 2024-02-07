@@ -6,82 +6,136 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 14:33:36 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/04 17:20:05 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/07 20:14:55 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static char	*fined_newline(int fd, char **line, char **st_arr, char *buf)
+// メモリ領域を解放するための関数
+static void	release_memory_area(char **line)
 {
-	int new_line_len;
-	// 改行までの文字数を取ってくる
-	new_line_len = strchr_len(fd, '\n');
-	if(new_line_len > 0)
-	{
-	*line = strnjoin(*line, buf, new_line_len);
-	if(*line == NULL)
-		return -1; // メモリ割り当て失敗
-	}
-	return 1;
-	
-	// TODO ;改行が見つからなかった場合
-	
-	
+	if (line == NULL)
+		return ;
+	free(*line);
+	*line = NULL;
 }
-/*
-BUFFER_SIZE 分だけ read を使ってファイルディスクリプタから読み込み
-読み込んだデータを st_arr に追加
-find_newline を呼び出して改行があるかどうかを確認
-*/
 
-static int	read_fd(int fd, char **line, char **st_arr)
+static int find_one_line(char **line)
 {
-	char	*buf;
-	int		read_bytes;
-	int		result;
+	char	*newline_ptr;
+	char *	newline_len;
+	char	*remaining_text;
 
-	buf = BUFFER_SIZE + 1;
-	if (st_arr != NULL) // st_arrが存在すれば、そこから先を先をlineにコピー
+	newline_ptr = gnl_strchr(*line, '\n'); // 改行までの文字数を取ってくる
+	// 改行が見つかったら
+	if (newline_ptr != NULL)
 	{
-		result = find_newline(fd, line, st_arr);
-		if (result != 0)
-			result;
+		newline_len = newline_ptr - *line; // 改行までの文字数
+		*line = gnl_strdup(newline_len);
+		if (*line == NULL)
+			return (-1); // メモリ割り当て失敗
+		//改行より後ろのテキストを残りのテキストとしてせっと
+		remaining_text = gnl_strdup(newline_ptr + 1);
+		if (*remaining_text == NULL)
+		{
+			free(*line);
+			return (-1);
+		}
+		return (remaining_text); // 残りのテキストを返す
 	}
-	while ((read_bytes = read(read_bytes, buf, BUFFER_SIZE)) > 0)
+	else
+	{
+		// 改行が見つからなかった場合 buf 全体の内容をline にコピー
+		*line = gnl_strdup();
+		if (*line == NULL)
+			return (-1);
+		// remainting_texgtはからに空に設定する
+		return (0); // 残りのテキストは空
+	}
+}
+
+/*
+	指定されたファイルディスクリプたからデータを読みとり、それを文字列に追加する関数
+	BUFFER_SIZEのバッファを作成し、新しい文字列を作成
+	読み取ったデータを既存の文字列に追加
+	読み取りが終了したらバッファを解放hして読み取り￥バイト数を返す
+*/
+static int	read_fd(int fd, char **line)
+{
+	ssize_t	read_bytes;
+	char	*read_buffer;
+
+	read_buffer = (char *)malloc((size_t)BUFFER_SIZE + 1);
+	if (read_buffer == NULL)
+		return (-1);
+	read_bytes = read(fd, read_buffer, BUFFER_SIZE);
+	while (read_bytes > 0)
 	{
 		// バッファの終端を設定
-		buf[read_bytes] = '\0';
-		result = find_newline(fd, line, buf);
-		if (result != 0)
-			return (result);
+		read_buffer[read_bytes] = '\0';
+		*line = gnl_strjoin(*line, read_buffer);
+		if (*line == NULL)
+		{
+			free(read_buffer);
+			return (-1);
+		}
 	}
-	if (read_bytes == 0)
+	free(read_buffer);
+	if (read_bytes < 0) // 読み取りエラー
+		return (-1);
+	else if (read_bytes == 0 && *line && **line == '\0')
 	{
-		free(st_arr);
-		st_arr = NULL;
+		free(*line);
+		*line = NULL;
 		return (0);
 	}
-	return (-1); // read ERROR
+	else
+		return (1); // read ERROR
 }
 
 char	*get_next_line(int fd)
 {
-	static char **st_arr;
-	free(*st_arr);
-	st_arr = NULL;
+	static char	*line;
+	ssize_t		read_bytes;
 
-	// TODO: やること　関数を呼び出すために、指定したファイルの行を取ってくる
-	// ファイル読み取り
-	read_fd(BUFFER_SIZE, st_arr);
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	read_bytes = read_fd(fd, &line);
+	if (read_bytes < 0) //  読み取り失敗
+	{
+		release_memory_area(&line);
+		return (NULL);
+	}
+	if (read_bytes == 0 && gnl_count_strlen(*line) == 0) // データが空の時
+	{
+		release_memory_area(&line);
+		return (NULL);
+	}
+	return (find_one_line(&line));
+}
 
-	// ファイルディスクりぷたに対する処理
-	// TODO 1 関連するst_arrが初期化されていなければ初期化する
-	// TODO 2 find_new_lineを呼び出して改行があるかを確認する
-	// TODO 3 改行があれば、行を返して、st_arrを更新する
-	// TODO: 改行がなければread_fdを呼び出してデータを読み込む
+int	main(void)
+{
+	int fd = open("./test_line3.txt", O_RDONLY);
+	char *line;
+	int read_result;
 
-	// TODO: static char**な変数を用意する　-> st_arr ファイルディスクリプたごとの配列
-	// TODO: st_arr に改行があるか調べて、lineに入れたり、更新したりする
-	// TODO:
+	if(fd == -1)
+	{
+		fprintf(stdout, "faile open ERROR\n");
+		return (1);
+	}
+
+	// FILEから1行ずつ読み取り、lineに格納し、読み取り結果を表示
+	while (read_result == get_next_line(fd) > 0)
+	{
+		printf("%s\n", line);
+	}
+	if(read_result == 0)
+		printf("Reached end of file\n");
+	else
+		printf("Error occurred while reading\n");
+	close(fd);
+	return 0;
 }
