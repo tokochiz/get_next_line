@@ -6,7 +6,7 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 14:36:26 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/04 18:02:26 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/07 12:05:50 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,15 @@
 
 size_t	count_strchr_len(char *s, char c)
 {
+	size_t	len;
+
 	// 文字列sの文字列cまでのバイト数を返す。なければsの文字列を返す。
+	len = 0;
+	while (s[len] != '\0' || s == c)
+	{
+		len++;
+	}
+	return (len);
 }
 
 // memoy copy
