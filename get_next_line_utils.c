@@ -6,32 +6,45 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 14:36:26 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/07 20:16:56 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/08 19:12:24 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*gnl_strchr(const char *s, int c)
+char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
-	while (*s != '\0')
+	char	*trim_s;
+	size_t	s_len;
+	size_t	i;
+
+	if (s == NULL)
+		return (NULL);
+	i = 0;
+	s_len = ft_strlen(s);
+	if (start >= s_len)
+		return (ft_strdup(""));
+	if (len >= s_len - start)
+		len = s_len - start;
+	trim_s = (char *)malloc(sizeof(char) * len + 1);
+	if (trim_s == NULL)
+		return (NULL);
+	while (i < len)
 	{
-		if (*s == (unsigned char)c)
-			return ((char *)s);
-		s++;
+		trim_s[i] = s[start + i];
+		i++;
 	}
-	if (c == '\0')
-		return ((char *)s);
-	return (NULL);
+	trim_s[len] = '\0';
+	return (trim_s);
 }
 
-char	*gnl_strdup(const char *s1)
+char	*ft_strdup(const char *s1)
 {
 	char	*p;
 	size_t	s_len;
 	int		i;
 
-	s_len = gnl_strlen(s1, "");
+	s_len = ft_strlen(s1);
 	p = (char *)malloc(sizeof(char) * (s_len + 1));
 	if (p == NULL)
 		return (NULL);
@@ -45,11 +58,10 @@ char	*gnl_strdup(const char *s1)
 	return (p);
 }
 
-size_t	gnl_strlen(char *s)
+size_t	ft_strlen(const char *s)
 {
 	size_t	len;
 
-	// 文字列sの文字列cまでのバイト数を返す。なければsの文字列を返す。
 	len = 0;
 	while (s[len] != '\0')
 	{
@@ -57,9 +69,24 @@ size_t	gnl_strlen(char *s)
 	}
 	return (len);
 }
+char	*ft_strchr(const char *s, int c)
+{
+	char	target_pos;
 
-// memcopy
-void	*gnl_memcpy(void *dst, const void *src, size_t n)
+	target_pos = (char)c;
+	while (*s != '\0')
+	{
+		if (*s == target_pos)
+			return ((char *)s);
+		s++;
+	}
+	if (target_pos == '\0')
+		return ((char *)s);
+	return (NULL);
+}
+
+// memcpy を使わない方式に書き換える
+void	*ft_memcpy(void *dst, const void *src, size_t n)
 {
 	unsigned char		*uc_dst;
 	const unsigned char	*uc_src;
@@ -78,12 +105,12 @@ void	*gnl_memcpy(void *dst, const void *src, size_t n)
 	return ((void *)dst);
 }
 
-char	*gnl_strjoin(char *s1, char *s2)
+char	*ft_strjoin(char *s1, char *s2)
 {
-	size_t s1_len;
-	size_t s2_len;
-	char *result;
-	char *dest;
+	size_t	s1_len;
+	size_t	s2_len;
+	char	*result;
+	char	*dest;
 
 	if (s1 == NULL || s2 == NULL)
 		return (NULL);
@@ -93,8 +120,8 @@ char	*gnl_strjoin(char *s1, char *s2)
 	if (result == NULL)
 		return (NULL);
 	dest = result;
-	gnl_memcpy(dest, s1, s1_len);
-	gnl_memcpy(dest + s1_len, s2, s2_len);
+	ft_memcpy(dest, s1, s1_len);
+	ft_memcpy(dest + s1_len, s2, s2_len);
 	result[s1_len + s2_len] = '\0';
 	return (result);
 }
