@@ -6,7 +6,7 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 14:36:26 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/08 19:12:24 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/09 14:10:06 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,11 +69,11 @@ size_t	ft_strlen(const char *s)
 	}
 	return (len);
 }
-char	*ft_strchr(const char *s, int c)
+char	*ft_strchr(char *s, int c)
 {
 	char	target_pos;
 
-	target_pos = (char)c;
+	target_pos = (unsigned char)c;
 	while (*s != '\0')
 	{
 		if (*s == target_pos)
