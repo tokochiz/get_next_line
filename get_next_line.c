@@ -6,13 +6,13 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/09 16:45:06 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/10 14:32:33 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/10 20:00:13 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*release_memory_area(char **line)
+char	*release_memory(char **line)
 {
 	if (line == NULL || *line == NULL)
 		return (NULL);
@@ -33,17 +33,19 @@ static char	*get_line_from_save(char **save)
 		*save = NULL;
 		return (line);
 	}
-	else
+	i = 0;
+	while ((*save)[i] != '\n')
+		i++;
+	line = ft_substr(*save, 0, i + 1);
+	next_line = ft_strdup(*save + i + 1);
+	if (next_line == NULL)
 	{
-		i = 0;
-		while ((*save)[i] != '\n')
-			i++;
-		line = ft_substr(*save, 0, i + 1);
-		next_line = ft_strdup(*save + i + 1);
-		free(*save);
-		*save = next_line;
-		return (line);
+		free(line);
+		return (release_memory(save));
 	}
+	free(*save);
+	*save = next_line;
+	return (line);
 }
 
 static char	*read_file(int fd, char *buffer, char **save)
@@ -56,22 +58,18 @@ static char	*read_file(int fd, char *buffer, char **save)
 	{
 		read_bytes = read(fd, buffer, BUFFER_SIZE);
 		if (read_bytes == -1)
-			return (release_memory_area(save));
+			return (release_memory(save));
 		if (read_bytes == 0)
 			break ;
 		buffer[read_bytes] = '\0';
 		tmp = ft_strjoin(*save, buffer);
 		if (tmp == NULL)
-		{
-			return (release_memory_area(save));
-		}
+			return (release_memory(save));
 		free(*save);
 		*save = tmp;
 	}
 	if (read_bytes == 0 && *save[0] == 0)
-	{
-		return (release_memory_area(save));
-	}
+		return (release_memory(save));
 	return (*save);
 }
 
@@ -83,11 +81,15 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || fd > OPEN_MAX)
 		return (NULL);
-	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	buffer = malloc(sizeof(char) * (size_t)(BUFFER_SIZE + 1));
 	if (buffer == NULL)
 		return (NULL);
 	if (save == NULL)
+	{
 		save = ft_strdup("");
+		if (save == NULL)
+			return (NULL);
+	}
 	line = read_file(fd, buffer, &save);
 	if (line == NULL)
 	{

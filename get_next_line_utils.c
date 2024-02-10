@@ -6,7 +6,7 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 14:36:26 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/09 14:10:06 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/10 19:12:27 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,22 +40,24 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 
 char	*ft_strdup(const char *s1)
 {
-	char	*p;
+	char	*ptr;
 	size_t	s_len;
 	int		i;
 
+	if (s1 == NULL)
+		return (NULL);
 	s_len = ft_strlen(s1);
-	p = (char *)malloc(sizeof(char) * (s_len + 1));
-	if (p == NULL)
+	ptr = (char *)malloc(sizeof(char) * (s_len + 1));
+	if (ptr == NULL)
 		return (NULL);
 	i = 0;
-	while (s1[i] != '\0')
+	while (s1[i])
 	{
-		p[i] = s1[i];
+		ptr[i] = s1[i];
 		i++;
 	}
-	p[i] = '\0';
-	return (p);
+	ptr[i] = '\0';
+	return (ptr);
 }
 
 size_t	ft_strlen(const char *s)
@@ -69,59 +71,41 @@ size_t	ft_strlen(const char *s)
 	}
 	return (len);
 }
+
 char	*ft_strchr(char *s, int c)
 {
-	char	target_pos;
-
-	target_pos = (unsigned char)c;
-	while (*s != '\0')
+	if (s == NULL)
+		return (NULL);
+	while (*s)
 	{
-		if (*s == target_pos)
+		if (*s == (unsigned char)c)
 			return ((char *)s);
 		s++;
 	}
-	if (target_pos == '\0')
+	if (c == '\0')
 		return ((char *)s);
 	return (NULL);
-}
-
-// memcpy を使わない方式に書き換える
-void	*ft_memcpy(void *dst, const void *src, size_t n)
-{
-	unsigned char		*uc_dst;
-	const unsigned char	*uc_src;
-	size_t				i;
-
-	if (dst == NULL && src == NULL)
-		return (NULL);
-	uc_dst = (unsigned char *)dst;
-	uc_src = (const unsigned char *)src;
-	i = 0;
-	while (i < n)
-	{
-		uc_dst[i] = uc_src[i];
-		i++;
-	}
-	return ((void *)dst);
 }
 
 char	*ft_strjoin(char *s1, char *s2)
 {
 	size_t	s1_len;
 	size_t	s2_len;
-	char	*result;
-	char	*dest;
+	char	*joined;
+	char	*tmp;
 
 	if (s1 == NULL || s2 == NULL)
 		return (NULL);
 	s1_len = ft_strlen(s1);
 	s2_len = ft_strlen(s2);
-	result = (char *)malloc(sizeof(char) * s1_len + s2_len + 1);
-	if (result == NULL)
+	joined = (char *)malloc(sizeof(char) * (s1_len + s2_len + 1));
+	if (joined == NULL)
 		return (NULL);
-	dest = result;
-	ft_memcpy(dest, s1, s1_len);
-	ft_memcpy(dest + s1_len, s2, s2_len);
-	result[s1_len + s2_len] = '\0';
-	return (result);
+	tmp = joined;
+	while (*s1)
+		*tmp++ = *s1++;
+	while (*s2)
+		*tmp++ = *s2++;
+	*tmp = '\0';
+	return (joined);
 }
