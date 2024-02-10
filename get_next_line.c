@@ -6,15 +6,20 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/09 16:45:06 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/09 18:26:42 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/10 14:32:33 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-// char	*releace_memory(char *line)
-// {
-// }
+char	*release_memory_area(char **line)
+{
+	if (line == NULL || *line == NULL)
+		return (NULL);
+	free(*line);
+	*line = NULL;
+	return (NULL);
+}
 
 static char	*get_line_from_save(char **save)
 {
@@ -24,8 +29,7 @@ static char	*get_line_from_save(char **save)
 
 	if (ft_strchr(*save, '\n') == NULL)
 	{
-		line = ft_strdup(*save);
-		free(*save);
+		line = *save;
 		*save = NULL;
 		return (line);
 	}
@@ -42,48 +46,65 @@ static char	*get_line_from_save(char **save)
 	}
 }
 
-static char	*read_file(int fd, char *buffer, char *joined)
+static char	*read_file(int fd, char *buffer, char **save)
 {
 	ssize_t	read_bytes;
+	char	*tmp;
 
 	read_bytes = 1;
-	while (read_bytes > 0 && !strchr(joined, '\n'))
+	while (read_bytes > 0 && ft_strchr(*save, '\n') == NULL)
 	{
 		read_bytes = read(fd, buffer, BUFFER_SIZE);
 		if (read_bytes == -1)
-			return (NULL);
+			return (release_memory_area(save));
 		if (read_bytes == 0)
 			break ;
 		buffer[read_bytes] = '\0';
-		joined = ft_strjoin(joined, buffer);
+		tmp = ft_strjoin(*save, buffer);
+		if (tmp == NULL)
+		{
+			return (release_memory_area(save));
+		}
+		free(*save);
+		*save = tmp;
 	}
-	if (read_bytes == 0 && ft_strlen(joined) == 0)
-		return (NULL);
-	free(buffer);
-	return (joined);
+	if (read_bytes == 0 && *save[0] == 0)
+	{
+		return (release_memory_area(save));
+	}
+	return (*save);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*save;
+	char		*line;
 	char		*buffer;
-	char		*joined;
 
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd > OPEN_MAX)
+		return (NULL);
 	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (buffer == NULL)
 		return (NULL);
-	joined = strdup("");
-	if (joined == NULL)
+	if (save == NULL)
+		save = ft_strdup("");
+	line = read_file(fd, buffer, &save);
+	if (line == NULL)
 	{
 		free(buffer);
 		return (NULL);
 	}
-	if (save == NULL)
-		save = read_file(fd, buffer, joined);
-	if (save == NULL)
-		return (NULL);
-	return (get_line_from_save(&save));
+	line = get_line_from_save(&save);
+	free(buffer);
+	return (line);
 }
+
+// #include <libc.h>
+
+// __attribute__((destructor)) static void destructor()
+// {
+// 	system("leaks -q a.out");
+// }
 
 // int	main(void)
 // {
@@ -91,7 +112,7 @@ char	*get_next_line(int fd)
 // 	char *line;
 
 // 	// テキストファイルを開く
-// 	fd = open("test1.txt", O_RDONLY);
+// 	fd = open("test.txt", O_RDONLY);
 // 	if (fd < 0)
 // 	{
 // 		perror("Failed to open file");
