@@ -6,7 +6,7 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/09 16:45:06 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/10 20:18:13 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/11 12:05:09 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,6 @@ static char	*read_file(int fd, char *buffer, char **save)
 	{
 		read_bytes = read(fd, buffer, BUFFER_SIZE);
 		if (read_bytes == -1)
-			// free(*save);
-			// *save = NULL;
 			return (release_memory(save));
 		if (read_bytes == 0)
 			break ;
