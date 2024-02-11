@@ -6,18 +6,24 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/09 16:45:06 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/11 12:05:09 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/11 21:21:35 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
 
-char	*release_memory(char **line)
+static char	*release_memory_buffer(char *buffer)
 {
-	if (line == NULL || *line == NULL)
+	free(buffer);
+	return (NULL);
+}
+
+static char	*release_memory(char **save)
+{
+	if (save == NULL || *save == NULL)
 		return (NULL);
-	free(*line);
-	*line = NULL;
+	free(*save);
+	*save = NULL;
 	return (NULL);
 }
 
@@ -57,8 +63,10 @@ static char	*read_file(int fd, char *buffer, char **save)
 	while (read_bytes > 0 && ft_strchr(*save, '\n') == NULL)
 	{
 		read_bytes = read(fd, buffer, BUFFER_SIZE);
-		if (read_bytes == -1)
-			return (release_memory(save));
+		if (read_bytes == -1){
+			release_memory(&save[fd]);
+			return NULL;
+		}
 		if (read_bytes == 0)
 			break ;
 		buffer[read_bytes] = '\0';
@@ -79,7 +87,7 @@ char	*get_next_line(int fd)
 	char		*line;
 	char		*buffer;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || fd > OPEN_MAX || read(fd, 0, 0) < 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd > OPEN_MAX || BUFFER_SIZE >= INT_MAX || read(fd, 0, 0) < 0)
 		return (NULL);
 	buffer = malloc(sizeof(char) * (size_t)(BUFFER_SIZE + 1));
 	if (buffer == NULL)
@@ -88,14 +96,11 @@ char	*get_next_line(int fd)
 	{
 		save[fd] = ft_strdup("");
 		if (save[fd] == NULL)
-			return (NULL);
+			return (release_memory_buffer(buffer));
 	}
 	line = read_file(fd, buffer, &save[fd]);
 	if (line == NULL)
-	{
-		free(buffer);
-		return (NULL);
-	}
+		return (release_memory_buffer(buffer));
 	line = get_line_from_save(&save[fd]);
 	free(buffer);
 	return (line);
@@ -111,15 +116,17 @@ char	*get_next_line(int fd)
 // int	main(void)
 // {
 // 	int fd;
+// 	int	fd2;
 // 	char *line;
 
 // 	// テキストファイルを開く
-// 	fd = open("test.txt", O_RDONLY);
+// 	fd = 42;//open("test.txt", O_RDONLY);
 // 	if (fd < 0)
 // 	{
 // 		perror("Failed to open file");
 // 		return (1);
 // 	}
+// 	fd2 = open("test2.txt", O_RDONLY);
 
 // 	// ファイルの内容を1行ずつ読み込む
 // 	while ((line = get_next_line(fd)))
@@ -127,6 +134,13 @@ char	*get_next_line(int fd)
 // 		printf("%s", line);
 // 		free(line);
 // 	}
+
+// 	while ((line = get_next_line(fd2)))
+// 	{
+// 		printf("%s", line);
+// 		free(line);
+// 	}
+
 
 // 	// ファイルを閉じる
 // 	close(fd);

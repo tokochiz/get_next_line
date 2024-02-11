@@ -6,18 +6,24 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/09 16:45:06 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/10 20:00:13 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/11 19:43:39 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*release_memory(char **line)
+static char	*release_memory_buffer(char *buffer)
 {
-	if (line == NULL || *line == NULL)
+	free(buffer);
+	return (NULL);
+}
+
+static char	*release_memory(char **save)
+{
+	if (save == NULL || *save == NULL)
 		return (NULL);
-	free(*line);
-	*line = NULL;
+	free(*save);
+	*save = NULL;
 	return (NULL);
 }
 
@@ -58,7 +64,9 @@ static char	*read_file(int fd, char *buffer, char **save)
 	{
 		read_bytes = read(fd, buffer, BUFFER_SIZE);
 		if (read_bytes == -1)
+		{
 			return (release_memory(save));
+		}
 		if (read_bytes == 0)
 			break ;
 		buffer[read_bytes] = '\0';
@@ -79,7 +87,7 @@ char	*get_next_line(int fd)
 	char		*line;
 	char		*buffer;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || fd > OPEN_MAX)
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd > OPEN_MAX || BUFFER_SIZE >= INT_MAX)
 		return (NULL);
 	buffer = malloc(sizeof(char) * (size_t)(BUFFER_SIZE + 1));
 	if (buffer == NULL)
@@ -88,14 +96,11 @@ char	*get_next_line(int fd)
 	{
 		save = ft_strdup("");
 		if (save == NULL)
-			return (NULL);
+			return (release_memory_buffer(buffer));
 	}
 	line = read_file(fd, buffer, &save);
 	if (line == NULL)
-	{
-		free(buffer);
-		return (NULL);
-	}
+		return (release_memory_buffer(buffer));
 	line = get_line_from_save(&save);
 	free(buffer);
 	return (line);
