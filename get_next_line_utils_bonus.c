@@ -6,7 +6,7 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 14:36:26 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/11 21:17:37 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/13 15:44:19 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,15 +99,13 @@ char	*ft_strjoin(char *s1, char *s2)
 	s1_len = ft_strlen(s1);
 	s2_len = ft_strlen(s2);
 	joined = (char *)malloc(sizeof(char) * (s1_len + s2_len + 1));
-	if (joined == NULL){
-		free(joined);
-		joined = NULL;
+	if (joined == NULL)
+	{
 		return (NULL);
 	}
 	tmp = joined;
 	while (*s1)
 		*tmp++ = *s1++;
-		
 	while (*s2)
 		*tmp++ = *s2++;
 	*tmp = '\0';

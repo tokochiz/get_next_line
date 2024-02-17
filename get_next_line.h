@@ -6,7 +6,7 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/04 14:21:39 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/11 11:39:36 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/13 15:35:56 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # include <unistd.h>
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 10
+#  define BUFFER_SIZE 20
 # endif
 
 char	*get_next_line(int fd);

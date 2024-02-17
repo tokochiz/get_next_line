@@ -6,7 +6,7 @@
 /*   By:  ctokoyod < ctokoyod@student.42tokyo.jp    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/09 16:45:06 by  ctokoyod         #+#    #+#             */
-/*   Updated: 2024/02/11 21:21:35 by  ctokoyod        ###   ########.fr       */
+/*   Updated: 2024/02/13 15:43:02 by  ctokoyod        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,10 +63,8 @@ static char	*read_file(int fd, char *buffer, char **save)
 	while (read_bytes > 0 && ft_strchr(*save, '\n') == NULL)
 	{
 		read_bytes = read(fd, buffer, BUFFER_SIZE);
-		if (read_bytes == -1){
-			release_memory(&save[fd]);
-			return NULL;
-		}
+		if (read_bytes == -1)
+			return (release_memory(save));
 		if (read_bytes == 0)
 			break ;
 		buffer[read_bytes] = '\0';
@@ -87,8 +85,8 @@ char	*get_next_line(int fd)
 	char		*line;
 	char		*buffer;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || fd > OPEN_MAX || BUFFER_SIZE >= INT_MAX || read(fd, 0, 0) < 0)
-		return (NULL);
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd > OPEN_MAX || BUFFER_SIZE >= INT_MAX)
+		return (release_memory(save));
 	buffer = malloc(sizeof(char) * (size_t)(BUFFER_SIZE + 1));
 	if (buffer == NULL)
 		return (NULL);
@@ -120,14 +118,22 @@ char	*get_next_line(int fd)
 // 	char *line;
 
 // 	// テキストファイルを開く
-// 	fd = 42;//open("test.txt", O_RDONLY);
+// 	fd = open("test.txt", O_RDONLY);
 // 	if (fd < 0)
 // 	{
 // 		perror("Failed to open file");
 // 		return (1);
 // 	}
-// 	fd2 = open("test2.txt", O_RDONLY);
+// 	fd2 = open("test.txt", O_RDONLY);
 
+// 	line = get_next_line(fd); printf("1:%s", line);
+// 	free(line);
+// 	line = get_next_line(fd); printf("2:%s", line);
+// 	free(line);
+// 	line = get_next_line(fd); printf("3:%s", line);
+// 	free(line);
+// 	close(fd);
+// 	return (0);
 // 	// ファイルの内容を1行ずつ読み込む
 // 	while ((line = get_next_line(fd)))
 // 	{
@@ -140,7 +146,6 @@ char	*get_next_line(int fd)
 // 		printf("%s", line);
 // 		free(line);
 // 	}
-
 
 // 	// ファイルを閉じる
 // 	close(fd);
